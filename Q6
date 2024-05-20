@@ -1,0 +1,49 @@
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras import layers, models, optimizers
+import matplotlib.pyplot as plt
+
+#parameters
+x1, k1 = 32, 3
+x2, k2 = 64, 3
+x3, d = 128, 0.5
+
+def create_cnn(x1, k1, x2, k2, x3, d):
+    model = models.Sequential()
+#1st conv layer
+    model.add(layers.Conv2D(x1, (k1, k1), activation='relu', input_shape=(input_height, input_width, input_channels)))
+    model.add(layers.MaxPooling2D((2, 2)))
+#2nd conv layer
+    model.add(layers.Conv2D(x2, (k2, k2), activation='relu'))
+    model.add(layers.MaxPooling2D((2, 2)))
+#flattened and fully connected layers
+    model.add(layers.Flatten())
+    model.add(layers.Dense(x3, activation='relu'))
+    model.add(layers.Dropout(d))
+
+#Output Layer
+    model.add(layers.Dense(10, activation='softmax'))
+    return model
+
+model = create_cnn(x1, k1, x2, k2, x3, d)
+model.summary()
+
+model.compile(optimizer=optimizers.Adam(learning_rate=0.001), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+input_height, input_width, input_channels = 28, 28, 1 #I/p dimensions for MNIST dataset
+#MNIST dataset
+(train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
+train_images = train_images.reshape((train_images.shape[0], 28, 28, 1)).astype('float32') / 255
+test_images = test_images.reshape((test_images.shape[0], 28, 28, 1)).astype('float32') / 255
+
+#train the model
+history = model.fit(train_images, train_labels, epochs=20, validation_data=(test_images, test_labels))
+
+plt.figure(figsize=(10, 5))
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend(loc='upper right')
+plt.show()
