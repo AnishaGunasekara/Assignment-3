@@ -1,0 +1,21 @@
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+def create_cnn(x1, k1, x2, k2, x3, d):
+    model = models.Sequential()
+#1st conv layer
+    model.add(layers.Conv2D(x1, (k1, k1), activation='relu', input_shape=(input_height, input_width, input_channels)))
+    model.add(layers.MaxPooling2D((2, 2)))
+#2nd conv layer
+    model.add(layers.Conv2D(x2, (k2, k2), activation='relu'))
+    model.add(layers.MaxPooling2D((2, 2)))
+#flattened and fully connected layers
+    model.add(layers.Flatten())
+    model.add(layers.Dense(x3, activation='relu'))
+    model.add(layers.Dropout(d))
+#o/p
+    model.add(layers.Dense(10, activation='softmax'))
+    return model
+    
+model = create_cnn(x1, k1, x2, k2, x3, d)
+model.summary()
