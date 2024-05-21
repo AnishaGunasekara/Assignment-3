@@ -1,0 +1,50 @@
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras import layers, models, optimizers
+import matplotlib.pyplot as plt
+
+#parameters
+x1, k1 = 32, 3
+x2, k2 = 64, 3
+x3, d = 128, 0.5
+
+def create_cnn(x1, k1, x2, k2, x3, d):
+    model = models.Sequential()
+#1st conv layer
+    model.add(layers.Conv2D(x1, (k1, k1), activation='relu', input_shape=(input_height, input_width, input_channels)))
+    model.add(layers.MaxPooling2D((2, 2)))
+#2nd conv layer
+    model.add(layers.Conv2D(x2, (k2, k2), activation='relu'))
+    model.add(layers.MaxPooling2D((2, 2)))
+#flattened and fully connected layers
+    model.add(layers.Flatten())
+    model.add(layers.Dense(x3, activation='relu'))
+    model.add(layers.Dropout(d))
+
+#Output Layer
+    model.add(layers.Dense(10, activation='softmax'))
+    return model
+
+input_height, input_width, input_channels = 28, 28, 1
+
+#learning rates
+learning_rates = [0.0001, 0.001, 0.01, 0.1]
+
+plt.figure(figsize=(10, 6))
+
+for lr in learning_rates:
+
+    model = create_cnn(x1, k1, x2, k2, x3, d)
+
+    model.compile(optimizer=optimizers.Adam(learning_rate=lr), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+    history = model.fit(train_images, train_labels, epochs=20, validation_data=(test_images, test_labels), verbose=0)
+
+#plot of training & validation loss values
+    plt.plot(history.history['val_loss'], label=f'LR={lr}')
+
+plt.title('Validation Loss for Different Learning Rates')
+plt.xlabel('Epoch')
+plt.ylabel('Validation Loss')
+plt.legend()
+plt.show()
